@@ -9,6 +9,6 @@ License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr
-Depends: R (>= 3.5.0),doParallel,parallel,foreach,igraph,cppRouting,shiny,shinydashboard,shinyjs,RCy3,visNetwork,plotfunctions,fields,DT,spam,dplyr,plyr,biomaRt
+Depends: R (>= 3.5.0),doParallel,parallel,foreach,igraph,cppRouting,shiny,shinydashboard,shinyjs,RCy3,visNetwork,plotfunctions,fields,DT,spam,dplyr,plyr,biomaRt,rlang
 Suggests: knitr,rmarkdown,RCy3
 RoxygenNote: 7.1.0
