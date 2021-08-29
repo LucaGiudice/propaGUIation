@@ -1,29 +1,21 @@
 # propaGUIation
-GUI (aka graphic user interface) to visualize and explore the values of the patient's features (e.g. genes) after a network-based propagation
+Graphic user interface to visualize and explore the values of the patient's features (e.g. genes) after a network-based propagation
 
 [![R-CMD-check](https://github.com/jokergoo/cola/workflows/R-CMD-check/badge.svg)](https://github.com/jokergoo/cola/actions)
-[ ![bioc](https://bioconductor.org/shields/downloads/devel/cola.svg) ](http://bioconductor.org/packages/stats/bioc/cola)
-[ ![bioc](http://bioconductor.org//shields/lastcommit/devel/bioc/cola.svg) ](http://bioconductor.org/checkResults/devel/bioc-LATEST/cola/)
-
 
 ## Features
 
-1. It finds novel enriched pathways between two classes in comparison
-2. It exploits the novel paradigm of patient similarity networks to detect pathways as no other method
-3. It generates information and data to further manual analysis and explorations
-4. It can be applied of multiple omics
-5. It does not require technical parameters, only the patient's/samples's information
-6. It allows to plot an enriched pathway in form of patient similarity network to have a beautiful informative image for the paper which allows to highlight the similarities and dissimilarities between patients
-7. It performs an outlier dection and retrieves how much each patient is likely to not fit in its own class defined by its clinical information
-8. It allows to explore the signature pathway of a patient class with a graphical interface
+1. It allows to explore a patient's/sample's profile (e.g. expression profile, somatic mutation profile, etc ...) after a network-based propagation
+2. It allows to investigate the propagation score obtained by specific patient's features (e.g. genes) and their neighbourhood
+3. It allows to download the propagated network and to import it in cytoscape
 
 ## Install
 
-*Simpati* is available on R, you can install it by:
+*propaGUIation* is available on R, you can install it by:
 
 ```r
 devtools::install_github(
-  repo="LucaGiudice/Simpati",
+  repo="LucaGiudice/propaGUIation",
   ref = "main",
   dependencies = "Depends",
   upgrade = "always",
@@ -35,61 +27,53 @@ devtools::install_github(
 
 There are the following vignettes:
 
-1. [A Quick Start of Using Simpati Package and introduction to the results](https://github.com/LucaGiudice/supplementary-Simpati/blob/main/images/Classification_Mutations_introduction.pdf)
-2. [Advanced workflow of Simpati performed with all the operations explicit](https://github.com/LucaGiudice/Simpati/blob/main/vignettes/Classification_Mutations_advanced.Rmd)
+1. [A Quick Start of Using propaGUIation Package](https://github.com/LucaGiudice/supplementary-Simpati/blob/main/images/vignette.pdf)
 
-## Classification and pathway detection
+## Interface
 
-<img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/workflow.png" />
+<img src="https://github.com/LucaGiudice/supplementary-Simpati/blob/main/images/gui_overall.png" />
 
-The cores of Simpati workflow:
-
-Frame A shows the workflow
-  1. Patient profiles colored by the class of belonging are described by biological features as genes. A gene-gene interaction network together with pathways are further input data required by the software. 
-  2. All profiles are individually propagated over the network. The profile’s values are replaced by scores that reflect the gene’s starting information and connections. 
-  3. Simpati proceeds by creating a patient similarity network for each pathway (psPSN). The pairwise similarity evaluates how much two patients have a similar pathway activity. 
-  4. The psPSN is decomposed into three components. Two with the intra-similarities of the class specific representative patients, while one with the inter-similarities between them.  If the similarities of one class dominate over the other two components, then the psPSN is signature. 
-  5. The latter is ultimately used to classify. An unknown patient is classified based on how much is like the other patients and on how much fits in the class specific representatives. 
-
-Frame B shows the effect of the propagation 
-1. The position of the gene and its level of expression leads a patient to act on the other genes and so on a pathway in a unique way. 
-
-Frame C shows the patient similarity used in Simpati
-1. It evaluates how much the genes between two patients are close and high in term of propagation values. Two patients that act on a pathway from the same gene positions and with the same expression values get the maximum similarity. 
-
-Frame D illustrates the biological interpretation behind a signature psPSN. 
-1. One class is cohesive because the disease is leading the patients to alter similarly the same pathway. One class is sparse because led by multiple factors.
+  1. Select nodes by chromosomes: allows to filter the network and to keep only those nodes (e.g. genes) that belong to a specific chromosome
+  2. Select nodes by genome region: allows to filter the network and to keep only those nodes that belong to a specific genome region
+  3. Select or type node + Distance: allows to visualize the neighbourhood of one specific node of interest
+  4. Select by propagation ranges: allows to filter the subnetwork generated with a "search". It allows to keep only the nodes with a value that falls inside a specific range
+  5. Scale colours: allows to scale the colors of the visualized nodes as if the propagation would have been applied only on them
+  6. More/Less: allow to increase or decrease the size of the neighbourhood around a node of interest based on the distance (e.g. first degree neighbourhood, second degree ...)
+  7. Open in cytoscape: allows to open the network in cytoscape
+  8. Download: allows to download the image of the network visualized and created with the GUI
 
 ### Usage
 
 Few lines of code to perfrom *Simpati* analysis:
 
 ```r
-library(Simpati)
+library("propaGUIation")
 
-#Get omic-specific patient profiles and their clinical data
-geno=tcga_data$LIHC$`LIHC_Mutation-20160128`$assay_df;see(geno)
-info=tcga_data$LIHC$`LIHC_Mutation-20160128`$clin_df;see(info)
-info=info[,c("patientID","pathologic_stage")]
+#Load and set up the example data ----
+data("example")
 
-#Set name of the dataset
-dataset_name="LIHC"
-#Set the semantic type of the disease for the disgnet enrichment
-disease_type=tcga_data$LIHC$semantic_type
-#Set key words associated to the patient's disease
-key_words=tcga_data$LIHC$key_words
+# get the original patient profile
+input_m = example$input_gm
+# get the propagated profile
+gg_prop = example$gg_prop
+# get the gene-gene interaction network
+g_net = example$gg_net
 
-#Gene interaction network
-net=huri_net_l$net_adj
+# download the annotation data for the genes in the propagated profile
+g_ann <- download_genes_annotation(organism = "human", gene_names = rownames(gg_prop))
 
-Simp_res=wrapper_human_mutations(geno,info,net,pathways_l,dataset_name,disease_type,key_words, n_cores=5,test_run=T,seed=0)
+#Create igraph object with all the information included
+net=create_net2plot(g_net = g_net, input_m = input_m, gf_prop = gg_prop, ann_net_b = g_ann)
+
+#Start GUI
+start_GUI(net, g_ann, example$chr_len, example=T)
 ```
 
 ### Plots
 
-Following plot shows you an example of pathway-specific patient similarity network between LIHC Late (L) stage cancer patients and Early (E)
+Following plot shows you an example of how to interact with the GUI and its functionalities
 
-<img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/BIOCARTA_MAPK_PATHWAY%20source-MSIGDB_C2%20source-BIOCARTA_MAPK_PATHWAY%20down-inv.png" /> <img src="https://raw.githubusercontent.com/LucaGiudice/supplementary-Simpati/main/images/HALLMARK_HEDGEHOG_SIGNALING%20source-MSIGDB_C2%20source-HALLMARK_HEDGEHOG_SIGNALING%20up-inv.png" />
+<img src="https://github.com/LucaGiudice/supplementary-Simpati/blob/main/images/gui_scene.gif" />
 
 ## License
 
