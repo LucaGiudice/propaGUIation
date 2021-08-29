@@ -1,0 +1,106 @@
+---
+title: "Vignette"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    theme: united
+    toc: yes
+  word_document:
+    toc: yes
+vignette: |
+  %\VignetteIndexEntry{Vignette} 
+  %\VignetteEngine{knitr::rmarkdown} 
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+# GUI introductive vignette
+
+Introduction of propaGUIation applied on a network-based propagated profile obtained from a gene expression profile.
+This vignette is recommended for who wants to understand how to start the GUI and explore the propagation scores (aka guilty scores) associated to the patient's features due to its overall biology and starting information.
+
+What you will get:
+
+- You will discover how to start the GUI
+
+For further information about how to use the GUI and which information it provides, I suggest you to read the README page of the github repository which provides you all the details about the interface.
+
+**Let's clean and prepare the enviroment for the workflow**
+
+We remove every variables, clean the RAM memory and load GUI library
+We set the random seed in order to get always the same results out of this workflow
+
+```{r setup}
+
+#Clean workspace and memory ----
+rm(list=ls())
+gc()
+
+#Set working directory ----
+gps0=getwd()
+gps0=paste(gps0,"/%s",sep="")
+rootDir=gps0
+setwd(gsub("%s","",rootDir))
+
+#Load libraries ----
+suppressWarnings(suppressMessages(
+  library("propaGUIation", quietly = T)
+  )
+)
+
+#Set variables ----
+#Set seed to get always the same results out of this vignette
+set.seed(8)
+```
+
+The GUI works with the original patient's profile, the propagated patient's profile and the network that has been used to propagate the starting patient's values. In this vignette, we tested the GUI in the visualization of a dummy patient's profile that had genes as features and expression levels as values.
+
+```{r example data loading}
+
+#Load and set up the example data ----
+data("example")
+
+# get the original patient profile
+input_m = example$input_gm;print(input_m)
+# get the propagated profile
+gg_prop = example$gg_prop;head(gg_prop)
+# get the gene-gene interaction network
+g_net = example$gg_net;head(g_net);
+
+```
+
+The GUI accepts the annotation of the features. In case of genes (hsa,mmu), it offers the possibility to automatically get it  with a function. The annotation will allow the GUI to connect the node names to the databases which offer more details and explanations about their function.
+
+```{r feature annotation}
+
+# download the annotation data for the genes in the propagated profile
+g_ann <- download_genes_annotation(organism = "human", gene_names = rownames(gg_prop))
+head(g_ann)
+
+```
+
+We give all the prepared data in a function which creates an igraph object including all the details for the interactive visualization
+
+```{r igraph object creation}
+
+#Create igraph object with all the information included
+net=create_net2plot(g_net = g_net, input_m = input_m, gf_prop = gg_prop, ann_net_b = g_ann)
+head(net)
+
+```
+
+We can start the GUI
+
+```{r GUI}
+
+start_GUI(net, g_ann, example$chr_len, example=T)
+
+```
+
+
