@@ -31,7 +31,7 @@ download_genes_annotation = function(organism = "human",gene_names){
 
   ensembl <- useEnsembl(biomart = "ensembl", dataset = dataset)
   a = getBM(attributes=c(gene_id,"chromosome_name","start_position","end_position"),
-    filters=c("chromosome_name",gene_id),values=list(c(1:19,"X","Y"),gene_names),mart=ensembl)
+    filters=c("chromosome_name",gene_id),values=list(c(1:19,"X","Y"),gene_names),mart=ensembl,useCache = FALSE)
   a = a[a[,1] != "",]
   a[,2] = paste("chr",a[,2],sep="")
   colnames(a) = c("ID","chr","start","end")
