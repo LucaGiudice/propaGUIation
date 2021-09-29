@@ -44,7 +44,7 @@ There are the following vignettes:
 
 ### Usage
 
-Few lines of code to perfrom *Simpati* analysis:
+Few lines of code to run the GUI:
 
 ```r
 library("propaGUIation")
